@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tax Calculation Form</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+ <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container my-5">
+    <div class="row">
+      <div class="col-md-6 mx-auto">
+        <form id="tax-form">
+          <div class="form-group position-relative">
+            <label for="gross-income" class="font-weight-bold">
+              Enter gross annual income
+              <span class="text-primary ml-2" data-toggle="tooltip" data-placement="right" title="Gross annual income is your total salary in a year before any deductions">
+                <i class="fas fa-question-circle"></i>
+              </span>
+            </label>
+            <div class="input-group">
+              <input type="text" class="form-control" id="gross-income" placeholder="Enter gross annual income">
+              <div class="input-group-append">
+                <span class="input-group-text bg-primary text-white" data-toggle="tooltip" data-placement="left" title="Please enter numbers only">
+                  <i class="fas fa-info-circle"></i>
+                </span>
+              </div>
+              <i class="fas fa-exclamation-circle error-icon" id="gross-income-error"></i>
+            </div>
+          </div>
+
+          <div class="form-group position-relative">
+            <label for="extra-income" class="font-weight-bold">Enter extra income</label>
+            <span class="text-primary ml-2" data-toggle="tooltip" data-placement="right" title="Any extra income that you earned outside of your regular salary">
+                <i class="fas fa-question-circle"></i>
+              </span>
+            <div class="input-group">
+              <input type="text" class="form-control" id="extra-income" placeholder="Enter extra income">
+              <div class="input-group-append">
+                <span class="input-group-text bg-primary text-white" data-toggle="tooltip" data-placement="left" title="Please enter numbers only">
+                  <i class="fas fa-info-circle"></i>
+                </span>
+              </div>
+              <i class="fas fa-exclamation-circle error-icon" id="extra-income-error"></i>
+            </div>
+          </div>
+
+          <div class="form-group position-relative">
+            <label for="deductions" class="font-weight-bold">Enter deductions</label>
+            <span class="text-primary ml-2" data-toggle="tooltip" data-placement="right" title="Any deductions or exemptions you are eligible for">
+                <i class="fas fa-question-circle"></i>
+              </span>
+            <div class="input-group">
+              <input type="text" class="form-control" id="deductions" placeholder="Enter deductions">
+              <div class="input-group-append">
+                <span class="input-group-text bg-primary text-white" data-toggle="tooltip" data-placement="left" title="Please enter numbers only">
+                  <i class="fas fa-info-circle"></i>
+                </span>
+              </div>
+              <i class="fas fa-exclamation-circle error-icon" id="deductions-error"></i>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="age-group" class="font-weight-bold">Select your age group</label>
+            <span class="text-primary ml-2" data-toggle="tooltip" data-placement="right" title="Your age group determines the tax slab applicable">
+                <i class="fas fa-question-circle"></i>
+              </span>
+            <select class="form-control" id="age-group">
+              <option value="">Select age group</option>
+              <option value="under-40">< 40</option>
+              <option value="between-40-60">≥ 40 &amp; < 60</option>
+              <option value="above-60">≥ 60</option>
+            </select>
+            <i class="fas fa-exclamation-circle error-icon" id="age-group-error"></i>
+          </div>
+
+          <button type="submit" class="btn btn-primary" id="submitBtn">Calculate Tax</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal -->
+  <div class="modal fade" id="resultModal" tabindex="-1" role="dialog" aria-labelledby="resultModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="resultModalLabel">Tax Calculation Result</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body" id="result-message">
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  <script>$(document).ready(function() {
+  // Initialize tooltips
+  $('[data-toggle="tooltip"]').tooltip();
+
+  // Form validation and submission
+  $('#tax-form').submit(function(event) {
+    event.preventDefault();
+
+    // Reset error icons
+    $('.error-icon').removeClass('show');
+
+    // Get form values
+    const grossIncome = $('#gross-income').val();
+    const extraIncome = $('#extra-income').val();
+    const ageGroup = $('#age-group').val();
+    const deductions = $('#deductions').val();
+
+    // Validate form values
+    let isValid = true;
+    if (!isNumeric(grossIncome)) {
+      $('#gross-income-error').addClass('show');
+      isValid = false;
+    }
+    if (!isNumeric(extraIncome)) {
+      $('#extra-income-error').addClass('show');
+      isValid = false;
+    }
+    if (!ageGroup) {
+      $('#age-group-error').addClass('show');
+      isValid = false;
+    }
+    if (!isNumeric(deductions)) {
+      $('#deductions-error').addClass('show');
+      isValid = false;
+    }
+
+    if (isValid) {
+      // Parse float values
+      const grossIncomeValue = parseFloat(grossIncome);
+      const extraIncomeValue = parseFloat(extraIncome);
+      const deductionsValue = parseFloat(deductions);
+
+      // Calculate tax
+      let taxAmount = 0;
+      const overallIncome = grossIncomeValue + extraIncomeValue - deductionsValue;
+      if (overallIncome > 800000) {
+        switch (ageGroup) {
+          case 'under-40':
+            taxAmount = (overallIncome - 800000) * 0.3;
+            break;
+          case 'between-40-60':
+            taxAmount = (overallIncome - 800000) * 0.4;
+            break;
+          case 'above-60':
+            taxAmount = (overallIncome - 800000) * 0.1;
+            break;
+        }
+      }
+
+      // Format overall income and tax amount
+      const overallIncomeFormatted = formatIndianCurrency(overallIncome);
+      const taxAmountFormatted = formatIndianCurrency(taxAmount);
+
+      // Display result in modal
+      const resultMessage = `Your overall income will be ${overallIncomeFormatted} after tax deductions`;
+      $('#result-message').html(`<p>${resultMessage}</p><p>Your tax amount is ${taxAmountFormatted}</p>`);
+      $('#resultModal').modal('show');
+    }
+  });
+
+  // Function to check if a value is numeric
+  function isNumeric(value) {
+    return /^\d+(\.\d+)?$/.test(value);
+  }
+
+  // Function to format numbers in Indian currency style
+  function formatIndianCurrency(amount) {
+    return amount.toLocaleString('en-IN', {
+      maximumFractionDigits: 2,
+      style: 'currency',
+      currency: 'INR',
+    });
+  }
+});
+  </script>
+</body>
+</html>
